@@ -30,16 +30,64 @@
             </div>
           </div>
         </div>
+        <div class="md-modal modal-msg md-modal-transition md-show">
+          <div class="md-modal-inner">
+            <div class="md-top">
+              <div class="md-title">Login in</div>
+              <button class="md-close" data-dismiss="modal" aria-label="Close" >Close</button>
+            </div>
+            <div class="md-content">
+              <div class="confirm-tips">
+                <div class="error-wrap" v-show="err_info">
+                  <span class="error error-show">用户名或密码错误</span>
+                </div>
+                <ul>
+                  <li class="regi_form_input">
+                    <i class="icon IconPeople"></i>
+                    <input type="text" tabindex="1" name="loginname" placeholder="Username" v-model="username">
+                  </li>
+                   <li class="regi_form_input noMargin">
+                    <i class="icon IconPwd"></i>
+                    <input type="password" tabindex="2" name="password" placeholder="Password" v-model="password">
+                  </li>
+                </ul>
+              </div>
+              <div class="login-wrap" @click="login">
+                <a href="javascript:;" class="btn-login">登 录</a>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="md-overlay"></div>
       </header>
   </div>
 </template>
 
 <script>
+import axios from "axios";
 export default {
   name: 'header-info',
   data () {
     return {
+      username:"", // 用户名
+      password:"", // 密码
+      err_info:false, // 错误提示信息
+    }
+  },
+  methods:{
+    //登录
+    login(){
+      axios.post("/users/login",{
+        "username":this.username,
+        "userPwd":this.password,
+      }).then(res =>{
+        if(res.data.status == "0"){
+          this.err_info = false;
       
+        } else{
+          this.err_info = true;
+        }
+      })
     }
   }
 }
@@ -47,5 +95,11 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-
+  @import "../assets/css/login.css";
+  input{
+    border:none;
+    height:42px;
+    line-height:42px;
+    width:90%;
+  }
 </style>

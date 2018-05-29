@@ -2,7 +2,7 @@ var express = require('express');
 var router = express.Router();
 var mongoose = require('mongoose');
 var Goods = require('../models/goods.js');
-mongoose.connect("mongodb://127.0.0.1:27017/test");
+mongoose.connect("mongodb://127.0.0.1:27017/demo");
 mongoose.connection.on("connected", function() {
     console.log("mongoDB collected successs");
 });
@@ -68,35 +68,53 @@ router.get("/", function(req, res, next) {
 });
 // 加入购物车
 router.post("/addCart", function(req, res, next) {
-    var userId = "1000000072";
-    var productId = req.body.productId
+    var userId = "100000077";
+    var productId = req.body.params.productId
     var User = require("../models/user.js");
-    console.log(2)
-    User.findOne({}, function(err, userData) {
-        console.log(3)
+    
+    User.findOne({"userId":userId}, function(err, userData) {
+        
         fnErr(res, err) //错误函数封装
         if (userData) {
-            console.log(4)
-            Goods.findOne({ "productId": productId }, function(err, productData) {
-                console.log(5)
-                fnErr(res, err) //错误函数封装
-                if (!productData) {
-                    console.log(6)
-                    productData.productNum = 1;
-                    productData.checked = true;
-                    productData.cartList.push(productData);
-                    productData.save(function(err, result) {
-                        console.log(7)
-                        fnErr(res, err) //错误函数封装
-                        console.log(8)
-                        res.json({
-                            status: "0",
-                            Msg: '',
-                            result: 'success'
-                        })
-                    })
+            var goodsItem = false;
+            userData.cartList.forEach(function(item,index){
+                if(item.productId == productId){
+                    goodsItem = true;
+                    item.productNum ++
                 }
-            })
+            });
+            if(goodsItem){
+                console.log(1)
+                userData.save(function(err, result) {
+                    fnErr(res, err) //错误函数封装
+                    res.json({
+                        status: "0",
+                        Msg: '',
+                        result: 'success'
+                    })
+                })
+            }else{
+                console.log(2)
+                Goods.findOne({ "productId": productId }, function(err, productData) {
+                    fnErr(res, err) //错误函数封装
+                    if(productData) {
+                        productData.productNum = 1;
+                        productData.checked = true;
+                        userData.cartList.push(productData);                     
+                        userData.save(function(err, result) {
+                            
+                            fnErr(res, err) //错误函数封装
+                           
+                            res.json({
+                                status: "0",
+                                Msg: '',
+                                result: 'success'
+                            })
+                        })
+                    }
+                })
+            }
+           
         }
 
 

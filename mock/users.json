@@ -1,0 +1,21 @@
+        {
+            "userId": "100000077",
+            "userName": "Tom",
+            "userPwd": "123456",
+            "orderList": [{
+                "orderId":"2132423432435",
+                "orderTotal":1600,
+                "orderStatus":1,
+                "create":"2018-05-29 19:39:31"
+                }],
+            "cartList": [{
+                "productId": "1002324",
+                "productName":"魅族mx6",
+                "productPrice": 1599,
+                "productImg": "1.jpg",
+                "checked": false,
+                "productNum": 1
+            }]
+            
+        }
+        
