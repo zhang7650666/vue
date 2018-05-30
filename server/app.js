@@ -22,6 +22,23 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+app.use(function(req, res, next){
+    //cookie存在 说明已经登录过了，接着往下走
+    if(req.cookies.userId){
+        next();
+    }else{
+        //如果操作的是登录、登出的操作的话，接着往下走, 否则的话拦截
+        if(req.originalUrl == "/users/login" || req.originalUrl == "/users/logout" || req.path == '/goods/list'){
+            next();
+        }else{
+            res.json({
+                "status":"1001",
+                "Msg":"未登录",
+                result:[],
+            })
+        }
+    }
+})
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use("/goods", goodsRouter)

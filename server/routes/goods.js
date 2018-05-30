@@ -13,7 +13,7 @@ mongoose.connection.on("disconnected", function() {
     console.log("mongoDB collected disconnected");
 });
 //查询商品列表
-router.get("/", function(req, res, next) {
+router.get("/list", function(req, res, next) {
     var sort = parseInt(req.query.sort) || 1;
     var page = parseInt(req.query.page) || 1;
     var pageSize = parseInt(req.query.pageSize) || 8;
@@ -47,13 +47,17 @@ router.get("/", function(req, res, next) {
                 $lte: priceEnd
             }
         }
-        console.log(params)
     }
     var goodsModel = Goods.find(params).skip(skip).limit(pageSize);
 
     goodsModel.sort({ 'productPrice': sort })
     goodsModel.exec(function(err, data) {
-        fnErr(res, err) //错误函数封装
+       //错误函数封装
+        if(err){
+            fnErr(res, err);
+            return;
+        }
+         
         res.json({
             status: "0",
             Msg: "",
@@ -73,20 +77,28 @@ router.post("/addCart", function(req, res, next) {
     var User = require("../models/user.js");
     
     User.findOne({"userId":userId}, function(err, userData) {
-        
-        fnErr(res, err) //错误函数封装
+       //错误函数封装
+       if(err){
+            fnErr(res, err);
+            return;
+        }
         if (userData) {
             var goodsItem = false;
             userData.cartList.forEach(function(item,index){
+
                 if(item.productId == productId){
                     goodsItem = true;
                     item.productNum ++
                 }
             });
             if(goodsItem){
-                console.log(1)
-                userData.save(function(err, result) {
-                    fnErr(res, err) //错误函数封装
+                console.log(1111)
+                userData.save(function(err, result1) {
+                   //错误函数封装
+                    if(err){
+                        fnErr(res, err);
+                        return;
+                    }
                     res.json({
                         status: "0",
                         Msg: '',
@@ -94,17 +106,23 @@ router.post("/addCart", function(req, res, next) {
                     })
                 })
             }else{
-                console.log(2)
+                console.log(2222)
                 Goods.findOne({ "productId": productId }, function(err, productData) {
-                    fnErr(res, err) //错误函数封装
+                    //错误函数封装
+                    if(err){
+                        fnErr(res, err);
+                        return;
+                    }
                     if(productData) {
                         productData.productNum = 1;
                         productData.checked = true;
                         userData.cartList.push(productData);                     
-                        userData.save(function(err, result) {
-                            
-                            fnErr(res, err) //错误函数封装
-                           
+                        userData.save(function(err, result1) {
+                           //错误函数封装
+                            if(err){
+                                fnErr(res, err);
+                                return;
+                            }
                             res.json({
                                 status: "0",
                                 Msg: '',
@@ -127,7 +145,6 @@ function fnErr(res, err) {
             status: "1",
             Msg: err.message,
         });
-        return;
     }
 }
 module.exports = router;

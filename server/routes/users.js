@@ -7,17 +7,23 @@ router.get('/', function(req, res, next) {
 });
 
 router.post("/login",function(req, res, next){
-  console.log(req)
   var parmas = {
     "userName":req.body.username,
     "userPwd":req.body.userPwd,
   };
-  console.log(parmas)
   User.findOne(parmas,function(err,data){
-    console.log(22)
-    fnErr(res, err);
+    if(err){
+      fnErr(res, err);
+      return;
+    }
+
+   if(data){
     //存cookie
     res.cookie("userId",data.userId,{
+      path:"/",
+      maxAge:1000 * 60 * 60 * 24
+    });
+    res.cookie("username",data.userName,{
       path:"/",
       maxAge:1000 * 60 * 60 * 24
     });
@@ -30,8 +36,47 @@ router.post("/login",function(req, res, next){
         username:data.userName
       }
     })
+   }else{
+    res.json({
+      status: "2",
+      Msg: '',
+    })
+   }
+    
   })
 });
+//登出
+router.post("/logout", function(req, res, next){
+  res.cookie("userId","",{
+    path:"/",
+    maxAge:-1,
+  });
+  res.cookie("username","",{
+    path:"/",
+    maxAge:-1,
+  })
+  res.json({
+    status: "0",
+    Msg: '清除成功',
+  })
+})
+
+//校验登录
+router.get("/checkLogin", function(req, res, next){
+  if(req.cookies.userId){
+    res.json({
+      "status":"0",
+      "Msg":"已登录",
+      "result":req.cookies.username,
+    })
+  }else{
+    res.json({
+      "status":"1",
+      "Msg":"未登录",
+      "result":[],
+    })
+  }
+})
 //错误函数封装
 function fnErr(res, err) {
   if (err) {
@@ -39,7 +84,6 @@ function fnErr(res, err) {
           status: "1",
           Msg: err.message,
       });
-      return;
   }
 }
 module.exports = router;

@@ -17,8 +17,8 @@
             <div class="navbar-menu-container">
               <!--<a href="/" class="navbar-link">我的账户</a>-->
               <span class="navbar-link"></span>
-              <a href="javascript:void(0)" class="navbar-link">Login</a>
-              <a href="javascript:void(0)" class="navbar-link">Logout</a>
+              <a href="javascript:void(0)" class="navbar-link" @click="loginModelFlag = true">{{user_name ? user_name : "Login"}}</a>
+              <a href="javascript:void(0)" class="navbar-link" @click="Logout" v-if="user_name">Logout</a>
               <div class="navbar-cart-container">
                 <span class="navbar-cart-count"></span>
                 <a class="navbar-link navbar-cart-link" href="/#/cart">
@@ -30,11 +30,11 @@
             </div>
           </div>
         </div>
-        <div class="md-modal modal-msg md-modal-transition md-show">
+        <div class="md-modal modal-msg md-modal-transition" :class="{'md-show':loginModelFlag}">
           <div class="md-modal-inner">
             <div class="md-top">
               <div class="md-title">Login in</div>
-              <button class="md-close" data-dismiss="modal" aria-label="Close" >Close</button>
+              <button class="md-close" data-dismiss="modal" aria-label="Close" @click="loginModelFlag=false">Close</button>
             </div>
             <div class="md-content">
               <div class="confirm-tips">
@@ -44,11 +44,11 @@
                 <ul>
                   <li class="regi_form_input">
                     <i class="icon IconPeople"></i>
-                    <input type="text" tabindex="1" name="loginname" placeholder="Username" v-model="username">
+                    <input type="text" tabindex="1" name="loginname" placeholder="Username" v-model.trim="username">
                   </li>
                    <li class="regi_form_input noMargin">
                     <i class="icon IconPwd"></i>
-                    <input type="password" tabindex="2" name="password" placeholder="Password" v-model="password">
+                    <input type="password" tabindex="2" name="password" placeholder="Password" v-model.trim="password">
                   </li>
                 </ul>
               </div>
@@ -58,7 +58,7 @@
             </div>
           </div>
         </div>
-        <div class="md-overlay"></div>
+        <div class="md-overlay" v-show="loginModelFlag" @click="loginModelFlag=false"></div>
       </header>
   </div>
 </template>
@@ -72,22 +72,54 @@ export default {
       username:"", // 用户名
       password:"", // 密码
       err_info:false, // 错误提示信息
+      loginModelFlag:false,//
+      user_name:"",
     }
   },
+  mounted () {
+    this.checkLogin();
+  },
   methods:{
+    //检测用户是否登录
+    checkLogin(){
+      axios.get("/users/checkLogin",{}).then(res =>{
+        if(res.data.status == "0"){
+          this.user_name = res.data.result;
+        }else{
+          this.user_name = "";
+        }
+      })
+    },
     //登录
     login(){
+      if(!this.username || !this.password){
+        this.err_info = true;
+        return;
+      }else{
+        this.err_info = false;
+      }
       axios.post("/users/login",{
         "username":this.username,
         "userPwd":this.password,
       }).then(res =>{
         if(res.data.status == "0"){
           this.err_info = false;
-      
+          this.loginModelFlag = false;
+          this.user_name = res.data.result.username
         } else{
           this.err_info = true;
+          this.loginModelFlag = true;
         }
       })
+    },
+    //登出
+    Logout(){
+      axios.post("/users/logout",{}).then(res =>{
+        if(res.data.status == "0"){
+          this.user_name = ""
+        }
+      })
+      
     }
   }
 }

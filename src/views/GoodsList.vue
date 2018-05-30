@@ -111,7 +111,7 @@ export default {
         sort:this.sortFlag ? 1 : -1,
         priceLeave:this.priceChecked,
       }
-      axios.get('/goods',{
+      axios.get('/goods/list',{
         params:params
       }).then(res => {
         this.loading = false;
