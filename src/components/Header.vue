@@ -48,7 +48,7 @@
                   </li>
                    <li class="regi_form_input noMargin">
                     <i class="icon IconPwd"></i>
-                    <input type="password" tabindex="2" name="password" placeholder="Password" v-model.trim="password">
+                    <input type="password" tabindex="2" name="password" placeholder="Password" v-model.trim="password" @keyup.enter="login">
                   </li>
                 </ul>
               </div>
@@ -66,7 +66,6 @@
 <script>
 import axios from "axios";
 export default {
-  name: 'header-info',
   data () {
     return {
       username:"", // 用户名

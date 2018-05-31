@@ -33,7 +33,6 @@
 
 <script>
 export default {
-  name: 'footer-info',
   data () {
     return {
       

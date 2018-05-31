@@ -13,7 +13,6 @@
 
 <script>
 export default {
-  name: 'bread-info',
   data () {
     return {
       

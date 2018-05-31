@@ -12,7 +12,7 @@
           <div class="filter-nav">
             <span class="sortby">Sort by:</span>
             <a href="javascript:void(0)" class="default cur">Default</a>
-            <a href="javascript:void(0)" class="price" @click="sortGoods">Price <svg class="icon icon-arrow-short"><use xlink:href="#icon-arrow-short"></use></svg></a>
+            <a href="javascript:void(0)" class="price" @click="sortGoods">Price <svg class="icon-arrow-short" :class="{'sort-up':sortFlag}"><use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icon-arrow-short"></use></svg></a>
             <a href="javascript:void(0)" class="filterby stopPop" @click="showFilterPop">Filter by</a>
           </div>
           <div class="accessory-result"> 
@@ -57,6 +57,27 @@
       <div class="md-overlay" v-show="overLayFlag" @click="closePop"></div>
       <!-- //footer信息 -->
       <v-footer></v-footer>
+      <!-- //modal信息 -->
+      <v-modal v-show="mdshow" :mdshow="mdshow" @modalHide="modalHide">
+        <div slot="message">
+          <p>请先登录之后才能添加购物车</p>
+        </div>
+        <div slot="btnGroup">
+          <a href="javascript:;" class="btn btn--m" @click="mdshow = false">关闭</a>
+        </div>
+      </v-modal>
+      <v-modal v-show="mdshowCart" :mdshow="mdshowCart" @modalHide="modalHide">
+        <div slot="message">
+          <svg class="navbar-cart-logo">
+            <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icon-cart"></use>
+          </svg>
+          <span>加入购物车成功</span> 
+        </div>
+        <div slot="btnGroup">
+          <a href="javascript:;" class="btn btn--m" @click="mdshowCart = false">关闭</a>
+          <router-link class="btn btn--m" to="/cart">继续购物</router-link>
+        </div>
+      </v-modal>
     </div>
 </template>
 
@@ -64,9 +85,9 @@
 import Header from "@/components/Header";  //头部信息组件导入
 import Footer from "@/components/Footer";  //footer信息组件导入
 import Bread from "@/components/Bread";  //bread 面包屑信息组件导入
+import Modal from "@/components/Modal";  //模态框组件导入
 import axios from "axios";  //bread 面包屑信息组件导入
 export default {
-  name: 'GoodList',
   data () {
     return {
       goodsList:[],//商品列表数组
@@ -96,6 +117,8 @@ export default {
       pageSize:6,//默认6条一页
       busy:true, //busy  为false  可以下拉  为true 时不能下拉
       loading:false,//loading 显示隐藏
+      mdshow:false,//modal显示隐藏
+      mdshowCart:false,//添加购物车成功modal显示隐藏
     }
   },
   mounted(){
@@ -184,17 +207,23 @@ export default {
         params:params
       }).then(res => {
         if(res.data.status == "0"){
-          alert("添加成功")
+          this.mdshowCart = true;
         }else{
-          alert("添加失败")
+          this.mdshow = true;
         }
       })
     },
+    //关闭modal框
+    modalHide(){
+      this.mdshow = false;
+      this.mdshowCart = false;
+    }
   },
   components:{
     "v-header":Header,
     'v-footer':Footer,
-    'v-bread':Bread
+    'v-bread':Bread,
+    'v-modal':Modal
   }
 
 }
@@ -205,5 +234,8 @@ export default {
     line-height:100px;
     text-align:center;
   }
-
+  .sort-up{
+    transfrom:rotate(180deg);
+    transition:all 0.3s ease-out;
+  }
 </style>
