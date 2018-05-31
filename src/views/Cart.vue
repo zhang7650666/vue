@@ -64,7 +64,7 @@
               <li v-for="(item,index) in cartList">
                 <div class="cart-tab-1">
                   <div class="cart-item-check">
-                    <a href="javascipt:;" class="checkbox-btn item-check-btn">
+                    <a href="javascipt:;" class="checkbox-btn item-check-btn" :class="{'check':item.checked}" @click="checked('one',item)">
                       <svg class="icon icon-ok">
                         <use xlink:href="#icon-ok"></use>
                       </svg>
@@ -84,9 +84,9 @@
                   <div class="item-quantity">
                     <div class="select-self select-self-open">
                       <div class="select-self-area">
-                        <a class="input-sub">-</a>
+                        <a class="input-sub" @click="edit('subtract',item)">-</a>
                         <span class="select-ipt">{{item.productNum}}</span>
-                        <a class="input-add">+</a>
+                        <a class="input-add" @click="edit('add',item)">+</a>
                       </div>
                     </div>
                   </div>
@@ -96,7 +96,7 @@
                 </div>
                 <div class="cart-tab-5">
                   <div class="cart-item-opration">
-                    <a href="javascript:;" class="item-edit-btn">
+                    <a href="javascript:;" class="item-edit-btn" @click="fnDelete(item.productId)">
                       <svg class="icon icon-del">
                         <use xlink:href="#icon-del"></use>
                       </svg>
@@ -111,7 +111,7 @@
           <div class="cart-foot-inner">
             <div class="cart-foot-l">
               <div class="item-all-check">
-                <a href="javascipt:;">
+                <a href="javascipt:;" @click="checked('all')">
                   <span class="checkbox-btn item-check-btn">
                       <svg class="icon icon-ok"><use xlink:href="#icon-ok"/></svg>
                   </span>
@@ -142,6 +142,15 @@
           <a href="javascript:;" class="btn btn--m" @click="mdshow = false">关闭</a>
         </div>
     </v-modal>
+    <v-modal v-show="del_pop" :mdshow="del_pop"  @modalHide="modalHide">
+        <div slot="message">
+          <p>你确定要删除这条数据吗?</p>
+        </div>
+        <div slot="btnGroup">
+          <a href="javascript:;" class="btn btn--m" @click="sure_del()">确定</a>
+          <a href="javascript:;" class="btn btn--m" @click="del_pop = false">关闭</a>
+        </div>
+    </v-modal>
   </div>
 </template>
 
@@ -156,7 +165,9 @@ export default {
     return {
         cartList:[],//购物车列表
         mdshow:false,//modal显示隐藏
+        del_pop:false,//删除modal显示
         err_info:'',//错误信息
+        productId:"",
     }
   },
   mounted(){
@@ -175,6 +186,76 @@ export default {
     //关闭modal框
     modalHide(){
         this.mdshow = false;
+        this.del_pop = false;
+        this.productId = "";
+    },
+    //删除一个商品
+    fnDelete(productId){
+      this.del_pop = true;
+      this.productId = productId;
+    },
+    //删除
+    sure_del(){
+      axios.post("/users/cartDel",{
+        "productId":this.productId
+      }).then(res =>{
+        if(res.data.status == "0"){
+          this.del_pop = false;
+          this.getCartList()
+        }else{
+          this.del_pop = true;
+        }
+      })
+    },
+    //商品数量减
+   edit(flag, item){
+      if(flag == "add"){
+        item.productNum++;
+      }else{
+        if(item.productNum == 1){
+          return;
+        };
+         item.productNum--;
+      }
+      axios.post("/users/cartEdit",{
+        "productId":item.productId,
+        "productNum":item.productNum
+      }).then(res =>{
+        if(res.data.status == "0"){
+          this.getCartList()
+        }else{
+        }
+      })
+    },
+    //选中商品
+    checked(flag,item){
+      let productId = ""
+      let checked = false;
+      let count = 0;
+      if(flag == "one"){
+        productId = item.productId;
+        checked = !item.checked
+      }else{
+        for(var i = 0; i < this.cartList.length; i++){
+          if(this.cartList[i].checked){
+            count ++;
+          }
+        };
+        if(count == this.cartList.length){
+          checked = false;
+        }else{
+          checked = true;
+        }
+      }
+      axios.post("/users/checked",{
+        "productId":productId,
+        "checked":checked
+      }).then(res =>{
+        if(res.data.status == "0"){
+          this.getCartList()
+        }else{
+        }
+      })
     }
   },
   components:{

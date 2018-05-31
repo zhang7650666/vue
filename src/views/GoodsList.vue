@@ -74,8 +74,9 @@
           <span>加入购物车成功</span> 
         </div>
         <div slot="btnGroup">
-          <a href="javascript:;" class="btn btn--m" @click="mdshowCart = false">关闭</a>
-          <router-link class="btn btn--m" to="/cart">继续购物</router-link>
+          <router-link class="btn btn--m" to="/cart" >关闭</router-link>
+          <a href="javascript:;" class="btn btn--m" @click="mdshowCart = false">继续购物</a>
+          
         </div>
       </v-modal>
     </div>

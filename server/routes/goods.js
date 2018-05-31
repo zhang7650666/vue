@@ -92,7 +92,6 @@ router.post("/addCart", function(req, res, next) {
                 }
             });
             if(goodsItem){
-                console.log(1111)
                 userData.save(function(err, result1) {
                    //错误函数封装
                     if(err){
@@ -106,7 +105,6 @@ router.post("/addCart", function(req, res, next) {
                     })
                 })
             }else{
-                console.log(2222)
                 Goods.findOne({ "productId": productId }, function(err, productData) {
                     //错误函数封装
                     if(err){
@@ -115,7 +113,7 @@ router.post("/addCart", function(req, res, next) {
                     }
                     if(productData) {
                         productData.productNum = 1;
-                        productData.checked = true;
+                        productData.checked = false;
                         userData.cartList.push(productData);                     
                         userData.save(function(err, result1) {
                            //错误函数封装

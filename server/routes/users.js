@@ -98,8 +98,78 @@ router.post("/cartList", function(req, res, next) {
                 })
             }
         })
+    });
+//删除购物车一条数据
+router.post("/cartDel", function(req, res, next) {
+  let productId = req.body.productId;
+  let userId = req.cookies.userId;
+  console.log(productId)
+  User.update({"userId":userId},{$pull:{"cartList":{"productId":productId}}},function(err,data){
+    if(err){
+      fnErr(res, err);
+      return;
+    };
+    res.json({
+      "status":"0",
+      "Msg":"数据删除成功",
+      "result":data
     })
-    //错误函数封装
+
+  })
+})
+//减少一条数据
+router.post("/cartEdit",function(req, res, next){
+  let productId = req.body.productId;
+  let userId = req.cookies.userId;
+  let productNum = req.body.productNum;
+  User.update({"userId":userId,"cartList.productId":productId},{"cartList.$.productNum":productNum},function(err,data){
+    if(err){
+      fnErr(res, err);
+      return;
+    };
+    res.json({
+      "status":"0",
+      "Msg":"修改成功",
+      "result":data
+    })
+
+  })
+})
+//选中
+router.post("/checked",function(req, res, next){
+  let userId = req.cookies.userId;
+  let productId = req.body.productId;
+  let checked = req.body.checked;
+  if(productId){
+    User.update({"userId":userId,"cartList.productId":productId},{"cartList.$.checked":checked},function(err,data){
+      if(err){
+        fnErr(res, err);
+        return;
+      };
+      res.json({
+        "status":"0",
+        "Msg":"修改成功",
+        "result":data
+      })
+  
+    })
+  }else{
+    User.update({"userId":userId},{"cartList.$.checked":checked},function(err,data){
+      if(err){
+        fnErr(res, err);
+        return;
+      };
+      res.json({
+        "status":"0",
+        "Msg":"修改成功",
+        "result":data
+      })
+  
+    })
+  }
+  
+})
+//错误函数封装
 function fnErr(res, err) {
     if (err) {
         res.json({

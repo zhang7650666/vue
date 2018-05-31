@@ -7,17 +7,16 @@ Vue.use(Router)
 
 export default new Router({
     mode: "history",
-
     routes: [{
             path: '*',
-            redirect: '/goods'
+            redirect: '/list'
         },
-        { //商品列表
-            path: '/goods',
+        { 
+            path: '/list',
             name: 'GoodsList',
             component: GoodsList
         },
-        { //购物车
+        { 
             path: '/cart',
             name: 'Cart',
             component: Cart
