@@ -92,7 +92,7 @@
                   </div>
                 </div>
                 <div class="cart-tab-4">
-                  <div class="item-price-total">{{item.productNum * item.productPrice}}</div>
+                  <div class="item-price-total">{{item.productNum * item.productPrice | currency("¥")}}</div>
                 </div>
                 <div class="cart-tab-5">
                   <div class="cart-item-opration">
@@ -112,7 +112,7 @@
             <div class="cart-foot-l">
               <div class="item-all-check">
                 <a href="javascipt:;" @click="checked('all')">
-                  <span class="checkbox-btn item-check-btn">
+                  <span class="checkbox-btn item-check-btn" :class="{'check':checkedAll}">
                       <svg class="icon icon-ok"><use xlink:href="#icon-ok"/></svg>
                   </span>
                   <span>Select all</span>
@@ -121,10 +121,10 @@
             </div>
             <div class="cart-foot-r">
               <div class="item-total">
-                Item total: <span class="total-price">500</span>
+                Item total: <span class="total-price">{{totalMoney == null ? 0 : totalMoney | currency("¥")}}</span>
               </div>
               <div class="btn-wrap">
-                <a class="btn btn--red">Checkout</a>
+                <a class="btn btn--red" :class="{'btn--dis':count == 0}" @click="checkout">Checkout</a>
               </div>
             </div>
           </div>
@@ -167,17 +167,34 @@ export default {
         mdshow:false,//modal显示隐藏
         del_pop:false,//删除modal显示
         err_info:'',//错误信息
-        productId:"",
+        productId:"",//产品Id
+        totalMoney:null,//总金额
+        checkedAll:false,//选中所有
+        count:0,
     }
   },
   mounted(){
       this.getCartList()
   },
   methods:{
-    getCartList(){
+    getCartList(flag){
+        this.count = 0;
         axios.post("/users/cartList",{}).then(res =>{
             if(res.data.status == "0"){
                 this.cartList = res.data.result;
+                this.totalMoney = null
+                for(var i = 0; i < this.cartList.length; i++){
+                  if(this.cartList[i].checked){               
+                    this.totalMoney += this.cartList[i].productNum * this.cartList[i].productPrice
+                    this.count ++;
+                  }
+                };
+                if(this.count == this.cartList.length){
+                  this.checkedAll = true;
+                }else{
+                  this.checkedAll = false;
+                }
+                
             }else{
                 this.err_info = res.data.Msg;
             }
@@ -231,18 +248,18 @@ export default {
     checked(flag,item){
       let productId = ""
       let checked = false;
-      let count = 0;
+      this.count = 0;
       if(flag == "one"){
         productId = item.productId;
         checked = !item.checked
       }else{
         for(var i = 0; i < this.cartList.length; i++){
           if(this.cartList[i].checked){
-            count ++;
+            this.count ++;
           }
         };
-        if(count == this.cartList.length){
-          checked = false;
+        if(this.count == this.cartList.length){
+          checked = false
         }else{
           checked = true;
         }
@@ -252,12 +269,25 @@ export default {
         "checked":checked
       }).then(res =>{
         if(res.data.status == "0"){
-          this.getCartList()
+          this.getCartList();
         }else{
         }
       })
+    },
+    //配送地址
+    checkout(){
+      if(this.count != 0){
+        this.$router.push({
+          path:"/address"
+        })
+      }
     }
   },
+  //局部过滤器
+  //filters:{
+    //货币格式化
+   // currency:currency
+  //},
   components:{
     "v-header":Header,
     'v-footer':Footer,

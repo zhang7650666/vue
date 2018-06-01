@@ -5,6 +5,7 @@ import App from './App'
 import router from './router'
 import vueLazyLoad from 'vue-lazyload' //图片加载钱loading   
 import infiniteScroll from "vue-infinite-scroll" // 下拉加载更多
+import {currency} from "@/util/util.js"; //金额格式化模块导入
 
 import "@/assets/css/base.css";
 import "@/assets/css/product.css";
@@ -17,7 +18,10 @@ Vue.use(vueLazyLoad, {
 })
 
 //下拉加载更多调用
-Vue.use(infiniteScroll)
+Vue.use(infiniteScroll);
+
+//全局过滤器
+Vue.filter("currency",currency)
 
 Vue.config.productionTip = false
 

@@ -79,97 +79,181 @@ router.get("/checkLogin", function(req, res, next) {
 });
 //查询当前用户的购物车 数据
 router.post("/cartList", function(req, res, next) {
-        var userId = req.cookies.userId;
+    var userId = req.cookies.userId;
+    User.findOne({ "userId": userId }, function(err, data) {
+        if (err) {
+            fnErr(res, err);
+            return;
+        };
+        if (data) {
+            res.json({
+                "status": "0",
+                "Msg": "success",
+                "result": data.cartList
+            })
+        } else {
+            res.json({
+                "status": "2",
+                "Msg": "用户不存在"
+            })
+        }
+    })
+});
+//删除购物车一条数据
+router.post("/cartDel", function(req, res, next) {
+        let productId = req.body.productId;
+        let userId = req.cookies.userId;
+        console.log(productId)
+        User.update({ "userId": userId }, { $pull: { "cartList": { "productId": productId } } }, function(err, data) {
+            if (err) {
+                fnErr(res, err);
+                return;
+            };
+            res.json({
+                "status": "0",
+                "Msg": "数据删除成功",
+                "result": data
+            })
+
+        })
+    })
+    //减少一条数据
+router.post("/cartEdit", function(req, res, next) {
+        let productId = req.body.productId;
+        let userId = req.cookies.userId;
+        let productNum = req.body.productNum;
+        User.update({ "userId": userId, "cartList.productId": productId }, { "cartList.$.productNum": productNum }, function(err, data) {
+            if (err) {
+                fnErr(res, err);
+                return;
+            };
+            res.json({
+                "status": "0",
+                "Msg": "修改成功",
+                "result": data
+            })
+
+        })
+    })
+    //选中
+router.post("/checked", function(req, res, next) {
+    let userId = req.cookies.userId;
+    let productId = req.body.productId;
+    let checked = req.body.checked;
+    if (productId) {
+        User.update({ "userId": userId, "cartList.productId": productId }, { "cartList.$.checked": checked }, function(err, data) {
+            if (err) {
+                fnErr(res, err);
+                return;
+            };
+            res.json({
+                "status": "0",
+                "Msg": "修改成功",
+                "result": data
+            })
+        })
+    } else {
         User.findOne({ "userId": userId }, function(err, data) {
             if (err) {
                 fnErr(res, err);
                 return;
             };
             if (data) {
-                res.json({
-                    "status": "0",
-                    "Msg": "success",
-                    "result": data.cartList
-                })
-            } else {
-                res.json({
-                    "status": "2",
-                    "Msg": "用户不存在"
+                data.cartList.forEach(item => {
+                    item.checked = checked
+                });
+                data.save(function(err, doc) {
+                    if (err) {
+                        fnErr(res, err);
+                        return;
+                    };
+                    res.json({
+                        "status": "0",
+                        "Msg": "修改成功",
+                        "result": 'success'
+                    })
                 })
             }
+
+
         })
-    });
-//删除购物车一条数据
-router.post("/cartDel", function(req, res, next) {
-  let productId = req.body.productId;
-  let userId = req.cookies.userId;
-  console.log(productId)
-  User.update({"userId":userId},{$pull:{"cartList":{"productId":productId}}},function(err,data){
-    if(err){
-      fnErr(res, err);
-      return;
-    };
-    res.json({
-      "status":"0",
-      "Msg":"数据删除成功",
-      "result":data
-    })
+    }
 
-  })
-})
-//减少一条数据
-router.post("/cartEdit",function(req, res, next){
-  let productId = req.body.productId;
-  let userId = req.cookies.userId;
-  let productNum = req.body.productNum;
-  User.update({"userId":userId,"cartList.productId":productId},{"cartList.$.productNum":productNum},function(err,data){
-    if(err){
-      fnErr(res, err);
-      return;
-    };
-    res.json({
-      "status":"0",
-      "Msg":"修改成功",
-      "result":data
+});
+//配送地址接口
+router.post("/address", function(req, res, next) {
+        let userId = req.cookies.userId
+        User.findOne({ "userId": userId }, function(err, data) {
+            if (err) {
+                fnErr(res, err);
+                return;
+            };
+            res.json({
+                "status": "0",
+                "Msg": "success",
+                "result": data.addressList
+            })
+        })
     })
+    //设置默认配送地址
+router.post("/setDefault", function(req, res, next) {
+        let userId = req.cookies.userId;
+        let addressId = req.body.addressId;
+        if (!addressId) {
+            res.json({
+                status: "1001",
+                Msg: '没有用户addressId',
+            });
+        }
+        User.findOne({ "userId": userId }, function(err, data) {
+            if (err) {
+                fnErr(res, err);
+                return;
+            };
+            data.addressList.forEach((item) => {
+                if (item.addressId == addressId) {
+                    item.isDefault = true
+                } else {
+                    item.isDefault = false;
+                };
+            })
+            data.save(function(err, doc) {
+                if (err) {
+                    fnErr(res, err);
+                    return;
+                };
+                res.json({
+                    "status": "0",
+                    "Msg": "设置成功",
+                    result: addressId
+                })
+            })
+        })
+    })
+    //删除一条配送地址
+router.post("/addressDel", function(req, res, next) {
+        let userId = req.cookies.userId;
+        let addressId = req.body.addressId;
+        if (!addressId) {
+            res.json({
+                status: "1001",
+                Msg: '没有用户addressId',
+            });
+        }
+        User.update({ "userId": userId }, { $pull: { "addressList": { "addressId": addressId } } }, function(err, data) {
+            if (err) {
+                fnErr(res, err);
+                return;
+            };
+            res.json({
+                "status": "0",
+                "Msg": "删除成功",
+                result: "删除成功"
+            })
 
-  })
-})
-//选中
-router.post("/checked",function(req, res, next){
-  let userId = req.cookies.userId;
-  let productId = req.body.productId;
-  let checked = req.body.checked;
-  if(productId){
-    User.update({"userId":userId,"cartList.productId":productId},{"cartList.$.checked":checked},function(err,data){
-      if(err){
-        fnErr(res, err);
-        return;
-      };
-      res.json({
-        "status":"0",
-        "Msg":"修改成功",
-        "result":data
-      })
-  
+        })
     })
-  }else{
-    User.update({"userId":userId},{"cartList.$.checked":checked},function(err,data){
-      if(err){
-        fnErr(res, err);
-        return;
-      };
-      res.json({
-        "status":"0",
-        "Msg":"修改成功",
-        "result":data
-      })
-  
-    })
-  }
-  
-})
-//错误函数封装
+    //错误函数封装
 function fnErr(res, err) {
     if (err) {
         res.json({

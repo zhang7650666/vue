@@ -3,19 +3,35 @@
             "userName": "Tom",
             "userPwd": "123456",
             "orderList": [{
-                "orderId":"2132423432435",
-                "orderTotal":1600,
-                "orderStatus":1,
-                "create":"2018-05-29 19:39:31"
-                }],
+                "orderId": "2132423432435",
+                "orderTotal": 1600,
+                "orderStatus": 1,
+                "create": "2018-05-29 19:39:31"
+            }],
             "cartList": [{
                 "productId": "1002324",
-                "productName":"魅族mx6",
+                "productName": "魅族mx6",
                 "productPrice": 1599,
                 "productImg": "1.jpg",
                 "checked": false,
                 "productNum": 1
-            }]
-            
+            }],
+            "addressList": [{
+                    "addressId": "1000000001",
+                    "userName": "施坑",
+                    "streetName": "湖北省武汉市歪子县歪子存250号",
+                    "postCoed": "1000000001",
+                    "tel": "13838384388",
+                    "isDefault": false
+                },
+                {
+                    "addressId": "1000000002",
+                    "userName": "倪烨",
+                    "streetName": "上海市金山区朱吕公路123号",
+                    "postCoed": "1000000002",
+                    "tel": "13838356789",
+                    "isDefault": false
+                }
+            ]
+
         }
-        

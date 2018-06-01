@@ -113,7 +113,7 @@ router.post("/addCart", function(req, res, next) {
                     }
                     if(productData) {
                         productData.productNum = 1;
-                        productData.checked = false;
+                        productData.checked = true;
                         userData.cartList.push(productData);                     
                         userData.save(function(err, result1) {
                            //错误函数封装
