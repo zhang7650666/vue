@@ -1,6 +1,7 @@
 var express = require('express');
 var router = express.Router();
 var User = require('../models/user.js');
+require("../util/util.js");
 /* GET users listing. */
 router.get('/', function(req, res, next) {
     res.send('respond with a resource');
@@ -251,6 +252,86 @@ router.post("/addressDel", function(req, res, next) {
                 result: "删除成功"
             })
 
+        })
+    })
+    //支付接口
+    router.post("/payMent", function(req, res, next){
+        let userId = req.cookies.userId;
+        let total = req.body.total;
+        let addressId = req.body.addressId;
+        User.findOne({"userId":userId},function(err,data){
+            if(err){
+                fnErr(res,err);
+                return;
+            };
+            //获取当前用户地址信息
+            let address = {};
+            data.addressList.forEach((item) =>{
+                if(addressId == item.item){
+                    address = item;
+                }
+            });
+            //获取用户购物车中购买的商品
+
+            let goods = [];
+            data.cartList.filter((item)=>{
+                if(item.checked){
+                    goods.push(item);
+                }
+            });
+            //商品订单ID创建
+            let platform = "622";
+            let r1 = Math.floor(Math.random() * 10);
+            let r2 = Math.floor(Math.random() * 10);
+            let sysDate = new Date().Format("yyyyMMddhhmmss");
+            let createDate = new Date("yyyy-MM-dd hh:mm:ss");
+            let orderId = platform + r1 + sysDate + r2;
+            let obj = {
+                "orderId":orderId,
+                "orderTotal":total,
+                "addressInfo":address,
+                "orderStatus":true,
+                "createDate":createDate
+            }
+            data.orderList.push(obj);
+            data.save(function(err,doc){
+                if(err){
+                    fnErr(res,err);
+                    return;
+                };
+                res.json({
+                    "status":"0",
+                    "Msg":"数据保存成功",
+                    "result":{
+                        "orderId":obj.orderId,
+                        "orderTotal":total,
+                    }
+                })
+            })
+           
+
+        })
+    });
+    //获取购物车数量
+    router.post("/getCartCount", function(req, res, next){
+        let userId ="";
+        let count = 0;
+        if(req.cookies && req.cookies.userId){
+            userId = req.cookies.userId;
+        };
+        User.findOne({"userId":userId},function(err, data){
+            if(err){
+                fnErr(res, err);
+                return;
+            };
+            data.cartList.forEach(item =>{
+               count += item.productNum
+            });
+            res.json({
+                "status":"0",
+                "Msg":"请求成功",
+                "result":count
+            })
         })
     })
     //错误函数封装

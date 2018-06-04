@@ -96,7 +96,7 @@
                 </div>
                 <div class="cart-tab-5">
                   <div class="cart-item-opration">
-                    <a href="javascript:;" class="item-edit-btn" @click="fnDelete(item.productId)">
+                    <a href="javascript:;" class="item-edit-btn" @click="fnDelete(item)">
                       <svg class="icon icon-del">
                         <use xlink:href="#icon-del"></use>
                       </svg>
@@ -167,7 +167,7 @@ export default {
         mdshow:false,//modal显示隐藏
         del_pop:false,//删除modal显示
         err_info:'',//错误信息
-        productId:"",//产品Id
+        productItem:"",//产品对象
         totalMoney:null,//总金额
         checkedAll:false,//选中所有
         count:0,
@@ -204,21 +204,22 @@ export default {
     modalHide(){
         this.mdshow = false;
         this.del_pop = false;
-        this.productId = "";
+        this.productItem.productId = "";
     },
     //删除一个商品
-    fnDelete(productId){
+    fnDelete(item){
       this.del_pop = true;
-      this.productId = productId;
+      this.productItem = item;
     },
     //删除
     sure_del(){
       axios.post("/users/cartDel",{
-        "productId":this.productId
+        "productId":this.productItem.productId
       }).then(res =>{
         if(res.data.status == "0"){
           this.del_pop = false;
-          this.getCartList()
+          this.getCartList();
+          this.$store.commit("updateCartCount",-this.productItem.productNum)
         }else{
           this.del_pop = true;
         }
@@ -239,7 +240,13 @@ export default {
         "productNum":item.productNum
       }).then(res =>{
         if(res.data.status == "0"){
-          this.getCartList()
+          this.getCartList();
+          if(flag == "add"){
+            this.$store.commit("updateCartCount",1)
+          }else{
+            this.$store.commit("updateCartCount",-1)
+          }
+          
         }else{
         }
       })

@@ -20,8 +20,8 @@
               <a href="javascript:void(0)" class="navbar-link" @click="loginModelFlag = true">{{user_name ? user_name : "Login"}}</a>
               <a href="javascript:void(0)" class="navbar-link" @click="Logout" v-if="user_name">Logout</a>
               <div class="navbar-cart-container">
-                <span class="navbar-cart-count"></span>
-                <a class="navbar-link navbar-cart-link" href="/#/cart">
+                <span class="navbar-cart-count" v-show="goodsCount > 0">{{goodsCount}}</span>
+                <a class="navbar-link navbar-cart-link" @click="goCart">
                   <svg class="navbar-cart-logo">
                     <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icon-cart"></use>
                   </svg>
@@ -72,20 +72,31 @@ export default {
       password:"", // 密码
       err_info:false, // 错误提示信息
       loginModelFlag:false,//
-      user_name:"",
+      //user_name:"",
+    }
+  },
+  computed:{
+   user_name(){
+      return this.$store.state.nickName;
+    },
+    goodsCount(){
+      return this.$store.state.cartCount;
     }
   },
   mounted () {
     this.checkLogin();
+    this.fnCartCount()
   },
   methods:{
     //检测用户是否登录
     checkLogin(){
       axios.get("/users/checkLogin",{}).then(res =>{
         if(res.data.status == "0"){
-          this.user_name = res.data.result;
+          this.$store.commit("updateUserInfo",res.data.result);
+          //this.user_name = res.data.result;
         }else{
-          this.user_name = "";
+          this.$store.commit("updateUserInfo","");
+          //this.user_name = "";
         }
       })
     },
@@ -104,7 +115,9 @@ export default {
         if(res.data.status == "0"){
           this.err_info = false;
           this.loginModelFlag = false;
-          this.user_name = res.data.result.username
+           this.$store.commit("updateUserInfo",res.data.result.username);
+           this.fnCartCount()
+         // this.user_name = res.data.result.username
         } else{
           this.err_info = true;
           this.loginModelFlag = true;
@@ -115,10 +128,23 @@ export default {
     Logout(){
       axios.post("/users/logout",{}).then(res =>{
         if(res.data.status == "0"){
-          this.user_name = ""
+          //this.user_name = ""
+          this.$store.commit("updateUserInfo","");
         }
       })
       
+    },
+    //去购物车页面
+    goCart(){
+      this.$router.push({path:"/cart"})
+    },
+    //获取购物车的数量
+    fnCartCount(){
+     axios.post("/users/getCartCount").then(res =>{
+       if(res.data.status =="0"){
+        return this.$store.commit("initCartCount",res.data.result)
+       }
+     })
     }
   }
 }

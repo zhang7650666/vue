@@ -118,7 +118,7 @@
                     </div>
                     </div>
                     <div class="next-btn-wrap">
-                    <a class="btn btn--m btn--red" href="#">Next</a>
+                        <a class="btn btn--m btn--red" href="javascript:;" @click="fnNext">Next</a>
                     </div>
                 </div>
             </div>
@@ -167,11 +167,14 @@ export default {
     },
     methods:{
         //获取当前用户的所有地址信息
-        getAddress(){
+        getAddress(flag){
             axios.post("/users/address",{}).then(res =>{
                 if(res.data.status == "0"){
                     this.addressData = res.data.result;
-                    this.checkedId = this.addressData[0].addressId
+                    if(!flag){
+                        this.checkedId = this.addressData[0].addressId
+                    }
+                    
                 }
             })
         },
@@ -186,7 +189,7 @@ export default {
             }).then(res =>{
                 if(res.data.status == "0"){
                     this.checkedId = res.data.result;
-                    this.getAddress()
+                    this.getAddress(true)
                 }
             })
         },
@@ -201,13 +204,18 @@ export default {
                 "addressId":this.curGoodsId
             }).then(res =>{
                 if(res.data.status == "0"){
-                    this.getAddress()
+                    this.del_pop = false;
+                    this.getAddress();
                 }
             }) 
         },
         //控制弹框显示隐藏
         modalHide(){
             this.del_pop = false;
+        },
+        //fnNext 
+        fnNext(){
+            this.$router.push({path:"/orderConfirm",query:{"checkedId":this.checkedId}})
         }
     },
     components:{

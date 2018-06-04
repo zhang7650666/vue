@@ -1,6 +1,7 @@
 // The Vue build version to load with the `import` command
 // (runtime-only or standalone) has been set in webpack.base.conf with an alias.
 import Vue from 'vue'
+import Vuex from 'vuex'
 import App from './App'
 import router from './router'
 import vueLazyLoad from 'vue-lazyload' //图片加载钱loading   
@@ -21,7 +22,28 @@ Vue.use(vueLazyLoad, {
 Vue.use(infiniteScroll);
 
 //全局过滤器
-Vue.filter("currency",currency)
+Vue.filter("currency",currency);
+
+//Vuex的使用
+Vue.use(Vuex);
+const store = new Vuex.Store({
+    state:{
+        "nickName":"",
+        "cartCount":0,
+    },
+    mutations:{
+        updateUserInfo(state,nickName){
+            state.nickName = nickName;
+        },
+        updateCartCount(state,cartCount){
+            state.cartCount += cartCount;
+        },
+        initCartCount(state,cartCount){
+           state.cartCount = cartCount
+        }
+
+    }
+})
 
 Vue.config.productionTip = false
 
@@ -29,6 +51,7 @@ Vue.config.productionTip = false
 new Vue({
     el: '#app',
     router,
+    store,
     components: { App },
     template: '<App/>'
 })

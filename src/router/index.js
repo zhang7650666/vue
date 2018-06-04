@@ -3,6 +3,8 @@ import Router from 'vue-router'
 import GoodsList from '@/views/GoodsList' //商品列表
 import Cart from '@/views/Cart' //商品列表
 import Address from '@/views/Address' //配送地址
+import OrderConfirm from '@/views/OrderConfirm' //next
+import OrderSuccess from '@/views/OrderSuccess' //订单成功页
 
 Vue.use(Router)
 
@@ -26,6 +28,16 @@ export default new Router({
             path: '/address',
             name: 'Address',
             component: Address
+        },
+        { //next
+            path: '/orderConfirm',
+            name: 'OrderConfirm',
+            component: OrderConfirm
+        },
+        { //订单成功页
+            path: '/orderSuccess',
+            name: 'OrderSuccess',
+            component: OrderSuccess
         }
     ]
 })
